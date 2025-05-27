@@ -1,58 +1,58 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div class="min-h-screen font-sans">
+    <!-- Navbar -->
+    <nav class="bg-[#121211] text-[#efdbbf] flex items-center justify-between px-6 py-4 shadow-md">
+      <div class="text-3xl font-bold">
+        <span class="text-[#efdbbf]">Flow</span><span class="text-[#ac3030]">Medic</span>
+      </div>
+      <ul class="flex gap-6 text-sm">
+        <li><a href="#" class="hover:text-[#ac3030]">Inicio</a></li>
+        <li><a href="#" class="hover:text-[#ac3030]">Beneficios</a></li>
+        <li><a href="#" class="hover:text-[#ac3030]">Contacto</a></li>
+        <li><a href="#" class="hover:text-[#ac3030]">Mi Cuenta</a></li>
+        <li><a href="#" class="hover:text-[#ac3030]">Iniciar Sesión</a></li>
+      </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-cover bg-center h-[500px] flex items-center justify-center" style="background-image: url('https://images.unsplash.com/photo-1580281657527-47f249e16408?auto=format&fit=crop&w=1950&q=80');">
+      <div class="bg-black bg-opacity-50 p-8 rounded-xl text-center">
+        <h1 class="text-4xl md:text-5xl font-semibold text-white mb-4">Encuentra tu Doctor</h1>
+        <p class="text-white text-sm md:text-base mb-6">Busca por especialidad, ciudad o seguro</p>
+        <div class="bg-white flex rounded-lg overflow-hidden shadow-md max-w-2xl mx-auto">
+          <input type="text" placeholder="Escribe especialidad o apellido" class="px-4 py-2 flex-grow outline-none text-black" />
+          <select class="px-4 py-2 border-l outline-none text-black">
+            <option>Ciudad</option>
+            <option>La Paz</option>
+            <option>Cochabamba</option>
+            <option>Santa Cruz</option>
+          </select>
+          <select class="px-4 py-2 border-l outline-none text-black">
+            <option>Seguro</option>
+            <option>CNS</option>
+            <option>UNIVIDA</option>
+            <option>Particular</option>
+          </select>
+          <button class="bg-[#ac3030] px-4 py-2 text-white">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="p-6 text-center text-sm bg-[#121211] text-[#efdbbf] border-t border-[#68181f]">
+      &copy; 2025 FlowMedic. Todos los derechos reservados.
+    </footer>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+  name: 'FlowMedicLanding',
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 </style>

@@ -7,47 +7,64 @@
 
     <!-- Desktop menu -->
     <div class="menu-desktop">
-      <!-- Zona central DERECHA: enlaces + botones/usuario -->
+      <!-- Enlaces centrales -->
       <ul class="menu">
-        <li><a @click.prevent="navigate('home')"             class="menu-link">Inicio</a></li>
-        <li><a @click.prevent="scrollTo('#menu-usuario')" class="menu-link">Hospitales</a></li>
-        <li><a @click.prevent="scrollTo('#')" class="menu-link">Información</a></li>
+        <li>
+          <a @click.prevent="navigate('home')" class="menu-link">Inicio</a>
+        </li>
+        <li>
+          <a @click.prevent="scrollTo('#menu-usuario')" class="menu-link">
+            Hospitales
+          </a>
+        </li>
+        <li>
+          <a @click.prevent="scrollTo('#')" class="menu-link">Información</a>
+        </li>
       </ul>
 
+      <!-- Bloque derecho -->
       <div class="right-block">
-        <!-- Ruta especial -->
-        <button v-if="onSpecialRoute" class="btn btn-outline" @click="goBack">Volver</button>
+        <!-- “Volver” en rutas especiales -->
+        <button
+          v-if="onSpecialRoute"
+          class="btn btn-outline"
+          @click="goBack"
+        >
+          Volver
+        </button>
 
-        <!-- NO autenticado -->
-        <template v-else-if="!isAuthenticated">
-          <button class="btn btn-outline" @click="navigate('login')">Iniciar Sesión</button>
-        </template>
-
-        <!-- SÍ autenticado -->
-        <div v-else class="user-info">
-          <i class="fas fa-bell"></i>
-          <div class="user-profile" @click="toggleDropdown">
-            <i class="fas fa-user-circle"></i>
-            <span>{{ nombreUsuario }}</span>
-          </div>
-          <div v-if="dropdownOpen" class="dropdown-menu">
-            <ul><li @click="confirmLogout">Cerrar sesión</li></ul>
-          </div>
-        </div>
+        <!-- En modo “public” -->
+        <button
+          v-else-if="mode === 'public'"
+          class="btn btn-outline"
+          @click="navigate('login')"
+        >
+          Iniciar Sesión
+        </button>
+        <!-- En modo “user” no aparece nada más -->
       </div>
     </div>
 
-    <!-- Hamburguesa móvil -->
+    <!-- Menú hamburguesa móvil -->
     <div class="menuToggle">
       <input type="checkbox" id="menu-btn" v-model="menuOpen" />
       <span></span><span></span><span></span>
       <ul class="menuItem">
-        <li><a @click.prevent="navigate('home')" class="menu-link">Inicio</a></li>
-        <li><a @click.prevent="scrollTo('#funcionalidades')" class="menu-link">Funcionalidades</a></li>
-        <li><a @click.prevent="scrollTo('#redes')" class="menu-link">Redes Sociales</a></li>
-        <li v-if="isAuthenticated"><a @click.prevent="navigate('panel-usuario')" class="menu-link">Panel de Usuario</a></li>
-        <li v-if="!isAuthenticated">
-          <button class="btn btn-outline" @click="navigate('login')">Iniciar Sesión</button>
+        <li>
+          <a @click.prevent="navigate('home')" class="menu-link">Inicio</a>
+        </li>
+        <li>
+          <a @click.prevent="scrollTo('#menu-usuario')" class="menu-link">
+            Hospitales
+          </a>
+        </li>
+        <li>
+          <a @click.prevent="scrollTo('#')" class="menu-link">Información</a>
+        </li>
+        <li v-if="mode === 'public'">
+          <button class="btn btn-outline" @click="navigate('login')">
+            Iniciar Sesión
+          </button>
         </li>
       </ul>
     </div>
@@ -55,102 +72,49 @@
 </template>
 
 <script>
-import Swal from 'sweetalert2'
-
 export default {
   name: 'NavbarGeneral',
-  props: { nombre: String },
+  props: {
+    // 'public' muestra “Iniciar Sesión”, 'user' lo oculta
+    mode: {
+      type: String,
+      default: 'public'
+    }
+  },
   data() {
     return {
-      isAuthenticated: false,
-      nombreUsuario: this.nombre || '',
-      dropdownOpen: false,
-      menuOpen: false,
-      isOnMisMascotas: false,
-      isOnPerfilMascota: false,
-      isOnHistorialActividades: false,
-      isOnSalud: false,
-      isOnCalendario: false,
-      isOnNotificaciones: false
-    }
+      menuOpen: false
+    };
   },
   computed: {
     onSpecialRoute() {
-      return (
-        this.isOnMisMascotas ||
-        this.isOnPerfilMascota ||
-        this.isOnHistorialActividades ||
-        this.isOnSalud ||
-        this.isOnCalendario ||
-        this.isOnNotificaciones
-      )
-    }
-  },
-  mounted() {
-    this.checkAuth()
-    this.checkRoute()
-  },
-  watch: {
-    '$route.name'() {
-      this.checkAuth()
-      this.checkRoute()
+      // Lista de rutas donde mostramos "Volver"
+      const specials = [
+        'mis-mascotas',
+        'perfil-mascota',
+        'historial-actividades',
+        'salud',
+        'calendario',
+        'notificaciones'
+      ];
+      return specials.includes(this.$route.name);
     }
   },
   methods: {
-    checkAuth() {
-      const token = localStorage.getItem('authToken')
-      this.isAuthenticated = !!token
-      if (token) {
-        this.nombreUsuario = localStorage.getItem('nombre') || this.nombreUsuario
-      }
-    },
-    checkRoute() {
-      const name = this.$route.name
-      this.isOnMisMascotas          = name === 'mis-mascotas'
-      this.isOnPerfilMascota        = name === 'perfil-mascota'
-      this.isOnHistorialActividades = name === 'historial-actividades'
-      this.isOnSalud                = name === 'salud'
-      this.isOnCalendario           = name === 'calendario'
-      this.isOnNotificaciones       = name === 'notificaciones'
-    },
     navigate(route) {
-      this.$router.push({ name: route })
-      this.menuOpen = false
+      this.$router.push({ name: route });
+      this.menuOpen = false;
     },
     scrollTo(hash) {
-      const el = document.querySelector(hash)
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
-      this.menuOpen = false
+      const el = document.querySelector(hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      this.menuOpen = false;
     },
     goBack() {
-      this.$router.go(-1)
-    },
-    toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen
-    },
-    confirmLogout() {
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text:  '¿Deseas cerrar sesión?',
-        icon:  'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#9d8189',
-        cancelButtonColor:  '#ffcad4',
-        confirmButtonText: 'Sí, cerrar sesión',
-        cancelButtonText: 'Cancelar'
-      }).then(res => {
-        if (res.isConfirmed) this.logout()
-      })
-    },
-    logout() {
-      localStorage.removeItem('authToken')
-      localStorage.removeItem('nombre')
-      this.isAuthenticated = false
-      this.$router.push({ name: 'home' })
-      Swal.fire('Sesión cerrada','Has cerrado sesión correctamente.','success')
+      this.$router.go(-1);
     }
   }
-}
+};
 </script>
 
 <style scoped>

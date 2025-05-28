@@ -1,4 +1,6 @@
 <template>
+  <div>
+    <NavbarGeneral :mode="'user'" />
   <div class="cards-wrapper">
     <div class="cards-container">
       <div
@@ -46,16 +48,22 @@
       @close="popupVisible = false"
     />
   </div>
+  </div>
 </template>
 
 <script>
-import EstadoPopup from './Estado_Popup.vue'
+import NavbarGeneral from './NavbarGeneral.vue'
+import EstadoPopup   from './Estado_Popup.vue'
 
 export default {
   name: 'MenuUsuario',
-  components: { EstadoPopup },
+  components: {
+    NavbarGeneral,
+    EstadoPopup
+  },
   data() {
     return {
+      usuarioNombre: localStorage.getItem('nombre') || '',
       popupVisible: false,
       popupIndex: null,
       cards: [

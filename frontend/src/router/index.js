@@ -1,11 +1,10 @@
-// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
-// Importa tus vistas o componentes
 import Home from '@/views/Home.vue'
 import Hospitales from '@/views/Hospitales.vue'
 import Urgencias from '@/views/Urgencias.vue'
 import Login from '@/views/Login.vue'
+import MenuUsuario from '@/components/MenuUsuario.vue'
 
 const routes = [
   {
@@ -27,7 +26,13 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
-  }
+  },
+  {
+    path: '/menu-usuario',
+    name: 'MenuUsuario',
+    component: MenuUsuario
+  },
+
 ]
 
 const router = createRouter({

@@ -1,405 +1,315 @@
 <template>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-  />
-  <nav>
-    <div class="wrapper">
-      <div class="logo">
-        <div @click="navigate('home')" class="images cursor-pointer">
-          <img
-            class="w-100 object-cover imagenIcono"
-            style="max-width: 8rem !important"
-            src="@/assets/logo.png"
-            alt=""
-          />
-          <img
-            class="imagenIcono"
-            src="@/assets/logo.png"
-            alt=""
-          />
+  <nav class="navbar">
+    <!-- Logo -->
+    <div class="logo" @click="navigate('home')">
+      <img src="../assets/logo_fm.png" alt="Logo" class="logo-img" />
+    </div>
+
+    <!-- Desktop menu -->
+    <div class="menu-desktop">
+      <!-- Zona central DERECHA: enlaces + botones/usuario -->
+      <ul class="menu">
+        <li><a @click.prevent="navigate('home')"             class="menu-link">Inicio</a></li>
+        <li><a @click.prevent="scrollTo('#menu-usuario')" class="menu-link">Hospitales</a></li>
+        <li><a @click.prevent="scrollTo('#')" class="menu-link">Información</a></li>
+      </ul>
+
+      <div class="right-block">
+        <!-- Ruta especial -->
+        <button v-if="onSpecialRoute" class="btn btn-outline" @click="goBack">Volver</button>
+
+        <!-- NO autenticado -->
+        <template v-else-if="!isAuthenticated">
+          <button class="btn btn-outline" @click="navigate('login')">Iniciar Sesión</button>
+        </template>
+
+        <!-- SÍ autenticado -->
+        <div v-else class="user-info">
+          <i class="fas fa-bell"></i>
+          <div class="user-profile" @click="toggleDropdown">
+            <i class="fas fa-user-circle"></i>
+            <span>{{ nombreUsuario }}</span>
+          </div>
+          <div v-if="dropdownOpen" class="dropdown-menu">
+            <ul><li @click="confirmLogout">Cerrar sesión</li></ul>
+          </div>
         </div>
       </div>
+    </div>
 
-      <input type="radio" name="slider" id="menu-btn" v-model="menuOpen" />
-      <input type="radio" name="slider" id="close-btn" v-model="menuOpen" />
-      <ul class="nav-links">
-        <label for="close-btn" class="btn close-btn"
-          ><i class="fas fa-times"></i
-        ></label>
-        <li>
-          <a class="cursor-pointer" @click="navigate('urgencias')"
-            >Pacientes</a
-          >
-        </li>
-        <!--<li>
-          <a class="cursor-pointer" @click="navigate('pasos-investigador')"
-            >Pasos</a
-          >
-        </li>-->
-        <li>
-          <a href="#" class="desktop-item">Hospitales</a>
-          <input type="checkbox" id="showDrop" />
-          <label for="showDrop" class="mobile-item">Hospitales</label>
-          <ul class="drop-menu">
-            <li>
-              <a @click="navigate('hospitales')">hospitales</a>
-            </li>
-          </ul>
-        </li>
-        <li>
-          <a
-            class="cursor-pointer"
-            @click="navigate('login')"
-            v-if="this.$route.path !== '/login'"
-            >Iniciar sesión</a
-          >
+    <!-- Hamburguesa móvil -->
+    <div class="menuToggle">
+      <input type="checkbox" id="menu-btn" v-model="menuOpen" />
+      <span></span><span></span><span></span>
+      <ul class="menuItem">
+        <li><a @click.prevent="navigate('home')" class="menu-link">Inicio</a></li>
+        <li><a @click.prevent="scrollTo('#funcionalidades')" class="menu-link">Funcionalidades</a></li>
+        <li><a @click.prevent="scrollTo('#redes')" class="menu-link">Redes Sociales</a></li>
+        <li v-if="isAuthenticated"><a @click.prevent="navigate('panel-usuario')" class="menu-link">Panel de Usuario</a></li>
+        <li v-if="!isAuthenticated">
+          <button class="btn btn-outline" @click="navigate('login')">Iniciar Sesión</button>
         </li>
       </ul>
-      <label for="menu-btn" class="btn menu-btn" @click="fooMethod()"
-        ><i class="fas fa-bars"></i
-      ></label>
     </div>
   </nav>
 </template>
 
 <script>
+import Swal from 'sweetalert2'
+
 export default {
-  name: "NavbarComponent",
+  name: 'NavbarGeneral',
+  props: { nombre: String },
   data() {
     return {
-      menuOpen: true,
-    };
+      isAuthenticated: false,
+      nombreUsuario: this.nombre || '',
+      dropdownOpen: false,
+      menuOpen: false,
+      isOnMisMascotas: false,
+      isOnPerfilMascota: false,
+      isOnHistorialActividades: false,
+      isOnSalud: false,
+      isOnCalendario: false,
+      isOnNotificaciones: false
+    }
+  },
+  computed: {
+    onSpecialRoute() {
+      return (
+        this.isOnMisMascotas ||
+        this.isOnPerfilMascota ||
+        this.isOnHistorialActividades ||
+        this.isOnSalud ||
+        this.isOnCalendario ||
+        this.isOnNotificaciones
+      )
+    }
+  },
+  mounted() {
+    this.checkAuth()
+    this.checkRoute()
+  },
+  watch: {
+    '$route.name'() {
+      this.checkAuth()
+      this.checkRoute()
+    }
   },
   methods: {
-    async navigate(routeName) {
-      await this.$router.push({ name: routeName });
-      this.closeMobileMenu(); // Cierra el menú después del router.push
+    checkAuth() {
+      const token = localStorage.getItem('authToken')
+      this.isAuthenticated = !!token
+      if (token) {
+        this.nombreUsuario = localStorage.getItem('nombre') || this.nombreUsuario
+      }
     },
-    fooMethod() {
-      //open the modal with dom
-      document.getElementById("menu-btn").checked = true;
+    checkRoute() {
+      const name = this.$route.name
+      this.isOnMisMascotas          = name === 'mis-mascotas'
+      this.isOnPerfilMascota        = name === 'perfil-mascota'
+      this.isOnHistorialActividades = name === 'historial-actividades'
+      this.isOnSalud                = name === 'salud'
+      this.isOnCalendario           = name === 'calendario'
+      this.isOnNotificaciones       = name === 'notificaciones'
     },
-    closeMobileMenu() {
-      this.menuOpen = false; // Cierra el menú
+    navigate(route) {
+      this.$router.push({ name: route })
+      this.menuOpen = false
     },
-  },
-};
+    scrollTo(hash) {
+      const el = document.querySelector(hash)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+      this.menuOpen = false
+    },
+    goBack() {
+      this.$router.go(-1)
+    },
+    toggleDropdown() {
+      this.dropdownOpen = !this.dropdownOpen
+    },
+    confirmLogout() {
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text:  '¿Deseas cerrar sesión?',
+        icon:  'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#9d8189',
+        cancelButtonColor:  '#ffcad4',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then(res => {
+        if (res.isConfirmed) this.logout()
+      })
+    },
+    logout() {
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('nombre')
+      this.isAuthenticated = false
+      this.$router.push({ name: 'home' })
+      Swal.fire('Sesión cerrada','Has cerrado sesión correctamente.','success')
+    }
+  }
+}
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+@import '@fortawesome/fontawesome-free/css/all.css';
 
-a {
-  color: white !important;
-}
-
-nav {
-  position: relative;
-  z-index: 99;
-  width: 100%;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
   background: #68181f;
-}
-nav .wrapper {
-  position: relative;
-  max-width: 1300px;
-  padding: 0px 30px;
-  height: 90px;
-  line-height: 70px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  border-radius: 50px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  margin: 20px;
 }
 
-.wrapper .logo {
-  display: flex;
-  align-items: center;
-}
-.wrapper .logo a {
-  color: #f2f2f2;
-  font-size: 30px;
-  font-weight: 600;
-  text-decoration: none;
-  margin-right: 20px;
-}
-.wrapper .logo .images {
-  display: flex;
-  align-items: center;
-}
-.wrapper .logo .images img {
-  padding-top: 0.2rem;
-  width: 50px;
-  height: 60px;
-  object-fit: cover;
-  margin-left: 10px;
-}
-
-.wrapper .nav-links {
-  display: inline-flex;
-}
-.nav-links li {
-  list-style: none;
-}
-.nav-links li a {
-  color: #f2f2f2;
-  text-decoration: none;
-  font-size: 18px;
-  font-weight: 500;
-  padding: 9px 15px;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-}
-.nav-links li a:hover {
-  background: #253e55;
-}
-.nav-links li:hover {
-  transform: scale(1.05);
-  transition: transform 0.5s;
-}
-.nav-links .mobile-item {
-  display: none;
-}
-.nav-links .drop-menu {
-  position: absolute;
-  background: rgb(127, 125, 125);
-
-  width: 180px;
-  line-height: 45px;
-  top: 85px;
-  opacity: 0;
-  visibility: hidden;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-.nav-links li:hover .drop-menu,
-.nav-links li:hover .mega-box {
-  transition: all 0.3s ease;
-  top: 70px;
-  opacity: 1;
-  visibility: visible;
-}
-.drop-menu li a {
-  width: 100%;
-  display: block;
-  padding: 0 0 0 15px;
-  font-weight: 400;
-
-  border-radius: 0px;
-}
-
-.mega-box {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  padding: 0 30px;
-  top: 85px;
-  opacity: 0;
-
-  visibility: hidden;
-}
-.mega-box .content {
-  background: #f7be04;
-  padding: 25px 20px;
-  display: flex;
-
-  width: 100%;
-  justify-content: space-between;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-.mega-box .content .row {
-  width: calc(25% - 30px);
-  line-height: 45px;
-}
-.content .row img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.content .row header {
-  color: #f2f2f2;
-  font-size: 20px;
-  font-weight: 500;
-}
-.content .row .mega-links {
-  margin-left: -40px;
-  border-left: 1px solid rgba(255, 255, 255, 0.09);
-}
-.row .mega-links li {
-  padding: 0 20px;
-}
-.row .mega-links li a {
-  padding: 0px;
-  padding: 0 20px;
-  color: #d9d9d9;
-  font-size: 17px;
-  display: block;
-}
-.row .mega-links li a:hover {
-  color: #f2f2f2;
-}
-.wrapper .btn {
-  color: #fff;
-  font-size: 20px;
+/* Logo */
+.logo-img {
+  width: 70px; height: 70px;
   cursor: pointer;
-  display: none;
-}
-.wrapper .btn.close-btn {
-  position: absolute;
-  right: 30px;
-  top: 10px;
 }
 
-@media screen and (max-width: 970px) {
-  .wrapper .btn {
-    display: block;
-  }
-  .wrapper .nav-links {
-    position: fixed;
-    height: 100vh;
-    width: 100%;
-    max-width: 350px;
-    top: 0;
-    left: -100%;
-    background: #68181f;
-    display: block;
-    padding: 50px 10px;
-    line-height: 50px;
-    overflow-y: auto;
-    box-shadow: 0px 15px 15px rgba(0, 0, 0, 0.18);
-    transition: all 0.3s ease;
-  }
-  .nav-links .drop-menu {
-    background: #68181f;
-  }
-  /* custom scroll bar */
-  ::-webkit-scrollbar {
-    width: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #68181f;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #68181f;
-  }
-  #menu-btn:checked ~ .nav-links {
-    left: 0%;
-  }
-  #menu-btn:checked ~ .btn.menu-btn {
-    display: none;
-  }
-  #close-btn:checked ~ .btn.menu-btn {
-    display: block;
-  }
-  .nav-links li {
-    margin: 15px 10px;
-  }
-  .nav-links li a {
-    padding: 0 20px;
-    display: block;
-    font-size: 20px;
-  }
-  .nav-links .drop-menu {
-    position: static;
-    opacity: 1;
-    top: 65px;
-    visibility: visible;
-    padding-left: 20px;
-    width: 100%;
-    max-height: 0px;
-    overflow: hidden;
-    box-shadow: none;
-    transition: all 0.3s ease;
-  }
-  #showDrop:checked ~ .drop-menu,
-  #showMega:checked ~ .mega-box {
-    max-height: 100%;
-  }
-  .nav-links .desktop-item {
-    display: none;
-  }
-  .nav-links .mobile-item {
-    display: block;
-    color: #f2f2f2;
-    font-size: 20px;
-    font-weight: 500;
-    padding-left: 20px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-  }
-  .nav-links .mobile-item:hover {
-    background: #395572;
-  }
-  .drop-menu li {
-    margin: 0;
-  }
-  .drop-menu li a {
-    border-radius: 5px;
-    font-size: 18px;
-  }
-  .mega-box {
-    position: static;
-    top: 65px;
-    opacity: 1;
-    visibility: visible;
-    padding: 0 20px;
-    max-height: 0px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-  .mega-box .content {
-    box-shadow: none;
-    flex-direction: column;
-    padding: 20px 20px 0 20px;
-  }
-  .mega-box .content .row {
-    width: 100%;
-    margin-bottom: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  .mega-box .content .row:nth-child(1),
-  .mega-box .content .row:nth-child(2) {
-    border-top: 0px;
-  }
-  .content .row .mega-links {
-    border-left: 0px;
-    padding-left: 15px;
-  }
-  .row .mega-links li {
-    margin: 0;
-  }
-  .content .row header {
-    font-size: 19px;
-  }
-}
-nav input {
-  display: none;
+/* Menú de escritorio: enlaces + botones alineados a la derecha */
+.menu-desktop {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end; /* todo al extremo derecho */
+  align-items: center;
+  gap: 2rem;
 }
 
-.body-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  text-align: center;
-  padding: 0 30px;
+/* Enlaces */
+.menu {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0; padding: 0;
 }
-.body-text div {
-  font-size: 45px;
+.menu-link {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color .3s;
+}
+.menu-link:hover {
+  color: #f4cfc6;
+}
+
+/* Bloque derecho (botones/usuario) */
+.right-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Botones */
+.btn {
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .3s;
+}
+.btn-outline {
+  background: transparent;
+  color: #efdbbf;
+  border: 2px solid #efdbbf;
+}
+.btn-outline:hover {
+  background: #efdbbf;
+  color: #121211;
+}
+
+/* Usuario */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+.user-info i {
+  font-size: 1.3rem;
+  color: #f4cfc6;
+  cursor: pointer;
+}
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+.user-profile span {
+  color: #fff;
   font-weight: 600;
 }
-.imagenIcono:hover {
-  transform: scale(1.1);
-  transition: transform 0.5s;
+
+/* Dropdown */
+.dropdown-menu {
+  position: absolute;
+  top: 40px; right: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 8px;
 }
-.imagenIcono {
-  margin-right: 1rem;
+.dropdown-menu ul {
+  list-style: none; margin: 0; padding: 0;
+}
+.dropdown-menu li {
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.dropdown-menu li:hover {
+  background: #f4f4f4;
+}
+
+/* Hamburguesa móvil */
+.menuToggle {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.menuToggle input {
+  display: none;
+}
+.menuToggle span {
+  width: 25px; height: 3px;
+  background: #fff;
+  margin: 3px 0;
+  transition: all .3s;
+}
+.menuItem {
+  position: absolute;
+  top: 60px; right: 20px;
+  background: #68181f;
+  border-radius: 10px;
+  display: none;
+  flex-direction: column;
+  padding: 10px;
+}
+.menuToggle input:checked ~ .menuItem {
+  display: flex;
+}
+.menuItem li {
+  list-style: none;
+  margin: 8px 0;
+}
+.menuItem .menu-link {
+  color: #fff;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .menu-desktop { display: none; }
+  .menuToggle { display: flex; }
 }
 </style>

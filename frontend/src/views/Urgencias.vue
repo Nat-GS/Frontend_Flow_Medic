@@ -98,6 +98,7 @@
       <!-- Botón para ir a generar simulación -->
       
     </div>
+     <FooterComponent />
   </div>
 </template>
 
@@ -105,10 +106,12 @@
 import { defineComponent, reactive, ref ,nextTick } from 'vue'
 import axios from 'axios'
 import NavbarComponent from '@/components/NavbarGeneral.vue'
+import FooterComponent from '@/components/Footer_Component.vue'
 
 export default defineComponent({
   name: 'UrgenciasPage',
-  components: { NavbarComponent },
+  components: { NavbarComponent, FooterComponent },
+  
   setup() {
     const form = reactive({
       peak_lambda: 15,

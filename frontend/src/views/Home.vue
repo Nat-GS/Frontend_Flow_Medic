@@ -2,22 +2,31 @@
   <div class="min-h-screen font-sans">
     <NavbarComponent />
 
-    <section class="h-[400px] flex items-center justify-center bg-[#121211] text-white">
-      <div class="text-center">
-        <h1 class="text-4xl font-bold mb-4">Bienvenido a FlowMedic</h1>
-        <p>Monitorea y predice tiempos de espera en urgencias hospitalarias.</p>
-      </div>
+        <section class="h-[400px] flex flex-col justify-center items-center bg-[#1F2937] text-white px-4">
+  <div class="text-center max-w-2xl">
+    <h1 class="text-4xl font-bold mb-4">Bienvenido a FlowMedic</h1>
+    <p class="text-lg">Monitorea y predice tiempos de espera en urgencias hospitalarias.</p>
+  </div>
+</section>
+
+
+
+    <!-- sección hospitales -->
+    <section class="mt-10">
+      <HospitalCards />
     </section>
   </div>
 </template>
 
 <script>
 import NavbarComponent from '@/components/NavbarGeneral.vue'
+import HospitalCards from '@/components/HospitalCards.vue'
 
 export default {
   name: 'HomePage',
   components: {
-    NavbarComponent
+    NavbarComponent,
+    HospitalCards
   }
 }
 </script>

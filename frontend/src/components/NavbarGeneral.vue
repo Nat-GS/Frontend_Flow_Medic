@@ -1,81 +1,82 @@
 <template>
   <nav class="navbar">
     <!-- Logo -->
-    <div class="logo" @click="navigate('home')">
+    <div class="logo" @click="goBack">
       <img src="../assets/logo_fm.png" alt="Logo" class="logo-img" />
     </div>
 
-    <!-- Desktop menu -->
-    <div class="menu-desktop">
-      <!-- Enlaces centrales -->
-      <ul class="menu">
-        <li>
-          <a @click.prevent="navigate('home')" class="menu-link">Inicio</a>
-        </li>
-        <li>
-          <a @click.prevent="scrollTo('#menu-usuario')" class="menu-link">
-            Hospitales
-          </a>
-        </li>
-        <li>
-          <a @click.prevent="scrollTo('#')" class="menu-link">Información</a>
-        </li>
-      </ul>
-
-      <!-- Bloque derecho -->
-      <div class="right-block">
-        <!-- “Volver” en rutas especiales -->
-        <button
-          v-if="onSpecialRoute"
-          class="btn btn-outline"
-          @click="goBack"
-        >
-          Volver
-        </button>
-
-        <!-- En modo “public” -->
-        <button
-          v-else-if="mode === 'public'"
-          class="btn btn-outline"
-          @click="navigate('login')"
-        >
-          Iniciar Sesión
-        </button>
-        <!-- En modo “user” no aparece nada más -->
-      </div>
+    <!-- Si estamos en Login, solo mostrar botón Volver -->
+    <div v-if="$route.name === 'Login'" class="right-block">
+      <button class="btn btn-outline" @click="goInicio">Inicio</button>
+      <button class="btn btn-outline" @click="goBack">Volver</button>
     </div>
 
-    <!-- Menú hamburguesa móvil -->
-    <div class="menuToggle">
-      <input type="checkbox" id="menu-btn" v-model="menuOpen" />
-      <span></span><span></span><span></span>
-      <ul class="menuItem">
-        <li>
-          <a @click.prevent="navigate('home')" class="menu-link">Inicio</a>
-        </li>
-        <li>
-          <a @click.prevent="scrollTo('#menu-usuario')" class="menu-link">
-            Hospitales
-          </a>
-        </li>
-        <li>
-          <a @click.prevent="scrollTo('#')" class="menu-link">Información</a>
-        </li>
-        <li v-if="mode === 'public'">
-          <button class="btn btn-outline" @click="navigate('login')">
-            Iniciar Sesión
-          </button>
-        </li>
-      </ul>
+    <!-- Menú normal si no estamos en Login -->
+    <div v-else>
+      <!-- Desktop menu -->
+      <div class="menu-desktop">
+        <ul class="menu">
+          <li><a @click.prevent="navigate('Home')" class="menu-link">Inicio</a></li>
+        </ul>
+
+        <div class="right-block">
+  <button
+    v-if="mode === 'user'"
+    class="btn btn-outline"
+    @click="goInicio"
+  >
+    Inicio
+  </button>
+  <button
+    v-if="mode === 'user'"
+    class="btn btn-outline"
+    @click="goBack"
+  >
+    Volver
+  </button>
+
+  <button
+    v-else-if="mode === 'public'"
+    class="btn btn-outline"
+    @click="navigate('Login')"
+  >
+    Iniciar Sesión
+  </button>
+
+  <button
+    v-if="onSpecialRoute"
+    class="btn btn-outline"
+    @click="goBack"
+  >
+    Volver
+  </button>
+</div>
+
+      </div>
+
+      <!-- Mobile menu -->
+      <div class="menuToggle">
+        <input type="checkbox" id="menu-btn" v-model="menuOpen" />
+        <span></span><span></span><span></span>
+        <ul class="menuItem">
+          <li><a @click.prevent="navigate('Home')" class="menu-link">Inicio</a></li>
+          <li><a @click.prevent="navigate('Hospitales')" class="menu-link">Hospitales</a></li>
+          <li v-if="mode === 'public'">
+            <button class="btn btn-outline" @click="navigate('Login')">
+              Iniciar Sesión
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 </template>
+
 
 <script>
 export default {
   name: 'NavbarGeneral',
   props: {
-    // 'public' muestra “Iniciar Sesión”, 'user' lo oculta
     mode: {
       type: String,
       default: 'public'
@@ -88,7 +89,6 @@ export default {
   },
   computed: {
     onSpecialRoute() {
-      // Lista de rutas donde mostramos "Volver"
       const specials = [
         'mis-mascotas',
         'perfil-mascota',
@@ -101,8 +101,8 @@ export default {
     }
   },
   methods: {
-    navigate(route) {
-      this.$router.push({ name: route });
+    navigate(routeName) {
+      this.$router.push({ name: routeName });
       this.menuOpen = false;
     },
     scrollTo(hash) {
@@ -111,8 +111,11 @@ export default {
       this.menuOpen = false;
     },
     goBack() {
-      this.$router.go(-1);
-    }
+      this.$router.push('/index');
+    },
+    goInicio() {
+      this.$router.push('/')
+    },
   }
 };
 </script>

@@ -59,11 +59,13 @@
       </div>
     </div>
   </div>
+  <FooterComponent />
 </template>
 
 <script>
 import axios from 'axios'
 import NavbarGeneral from './NavbarGeneral.vue'
+import FooterComponent from './Footer_Component.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -72,7 +74,7 @@ library.add(faPlay)
 
 export default {
   name: 'MenuUsuario',
-  components: { NavbarGeneral, FontAwesomeIcon },
+  components: { NavbarGeneral, FontAwesomeIcon, FooterComponent },
   data() {
     return {
       files: [],

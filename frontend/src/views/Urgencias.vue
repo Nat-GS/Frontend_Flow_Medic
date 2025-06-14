@@ -9,8 +9,9 @@
         <form @submit.prevent="runSimulation" class="form-body">
           <div
             class="form-group"
-            v-for="(value, key) in form"
+            v-for="(key) in Object.keys(form).filter(k => k !== 'hospital_id')"
             :key="key"
+            
           >
             <label class="form-label">
               {{ labels[key] || key }}
@@ -40,24 +41,69 @@
       </div>
 
       <!-- Resultados -->
-      <div v-if="result" class="result-box">
+      <div v-if="result" ref="resultSection" class="result-box">
         <h3 class="result-title">Resultados</h3>
         <p><strong>Archivo:</strong> {{ result.file_name }}</p>
-        <p><strong>ID en queue:</strong> {{ result.queue_id }}</p>
+        <p><strong>ID de simulacion:</strong> {{ result.queue_id }}</p>
         <h4>Métricas</h4>
         <pre class="result-metrics">{{ result.metrics }}</pre>
+        <div class="metrics-interpretation">
+          <h4>Interpretación de Métricas</h4>
+          <ul class="list-disc ml-6 mt-2 text-sm text-gray-700">
+            <li>
+              <strong>Tasa de admisión (admission_rate):</strong>
+              {{ (result.metrics.admission_rate * 100).toFixed(2) }}% de los pacientes fueron hospitalizados tras su atención inicial. Una tasa superior al 10% puede indicar una alta severidad de los casos.
+            </li>
+            <li>
+              <strong>Estancia promedio en el sistema (avg_los):</strong>
+              {{ result.metrics.avg_los.toFixed(2) }} minutos en promedio desde que el paciente entra al sistema hasta que se va. Valores altos pueden reflejar congestión o procesos lentos.
+            </li>
+            <li>
+              <strong>Tiempo promedio de espera en triaje (avg_wait_triage):</strong>
+              {{ result.metrics.avg_wait_triage.toFixed(2) }} minutos de espera antes de la clasificación inicial del paciente. Debe mantenerse bajo para garantizar atención oportuna.
+            </li>
+            <li>
+              <strong>Tiempo promedio de espera en consulta (avg_wait_consult):</strong>
+              {{ result.metrics.avg_wait_consult.toFixed(2) }} minutos de espera antes de ver a un médico. Tiempos altos indican una carga excesiva en el personal médico.
+            </li>
+            <li>
+              <strong>Tiempo promedio de espera en diagnóstico (avg_wait_diag):</strong>
+              {{ result.metrics.avg_wait_diag.toFixed(2) }} minutos esperando resultados de laboratorio o imágenes. Puede reflejar saturación en rayos X, laboratorio o ultrasonido.
+            </li>
+            <li>
+              <strong>Tiempo promedio de espera en tratamiento (avg_wait_treat):</strong>
+              {{ result.metrics.avg_wait_treat.toFixed(2) }} minutos de espera para recibir tratamiento. Un valor elevado puede deberse a limitaciones de camas o personal de enfermería.
+            </li>
+            <li>
+              <strong>Pacientes atendidos por hora (throughput):</strong>
+              {{ result.metrics.throughput.toFixed(2) }} pacientes completan todo el proceso por hora. Un valor alto indica buena capacidad de resolución del sistema hospitalario.
+            </li>
+          </ul>
+        </div>
+
+         <div class="flex justify-center mb-6">
+        <button
+          @click="goToDatos"
+          class="submit-button"        
+          >
+          Ver datos de simulación
+        </button>
       </div>
+      </div>
+     
 
       <div v-if="error" class="error-message">
         {{ error }}
       </div>
+      <!-- Botón para ir a generar simulación -->
+      
     </div>
      <FooterComponent />
   </div>
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from 'vue'
+import { defineComponent, reactive, ref ,nextTick } from 'vue'
 import axios from 'axios'
 import NavbarComponent from '@/components/NavbarGeneral.vue'
 import FooterComponent from '@/components/Footer_Component.vue'
@@ -125,26 +171,43 @@ export default defineComponent({
 
     const result = ref(null)
     const error = ref(null)
+    const resultSection = ref(null)
 
     async function runSimulation() {
       error.value = null
       result.value = null
+      
       try {
         const resp = await axios.post(`${process.env.VITE_API_URL}/simulate/`, form)
-
         result.value = resp.data
+        await nextTick()
+        resultSection.value?.scrollIntoView({ behavior: 'smooth' })
       } catch (e) {
         error.value = e.response?.data?.error || e.message
       }
     }
 
-    return { form, result, error, runSimulation, labels }
+    return { form, result, error, runSimulation, labels, resultSection }
+  },
+  methods: {
+    goToDatos() {
+      this.$router.push('/menu-usuario')
+    }
   }
+  
 })
 </script>
 
 <style scoped>
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+.metrics-interpretation {
+  background-color: #f9fafb;
+  border-left: 4px solid #10b981;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 0.375rem;
+}
 
 .form-container {
   padding: 40px 20px;

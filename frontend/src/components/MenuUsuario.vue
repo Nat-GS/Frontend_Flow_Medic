@@ -90,7 +90,7 @@
 <script>
 import axios from 'axios'
 import NavbarGeneral from './NavbarGeneral.vue'
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = process.env.VITE_API_URL;
 export default {
   name: 'MenuUsuario',
   components: {

@@ -130,7 +130,7 @@ export default defineComponent({
       error.value = null
       result.value = null
       try {
-        const resp = await axios.post(`${import.meta.env.VITE_API_URL}/simulate/`, form)
+        const resp = await axios.post(`${process.env.VITE_API_URL}/simulate/`, form)
 
         result.value = resp.data
       } catch (e) {

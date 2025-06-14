@@ -4,7 +4,9 @@
 ```
 npm install
 ```
-
+```
+npm install @fortawesome/fontawesome-free
+```
 ### Compiles and hot-reloads for development
 ```
 npm run serve

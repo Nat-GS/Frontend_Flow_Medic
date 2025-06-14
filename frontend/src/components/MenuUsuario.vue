@@ -31,7 +31,7 @@
               <td class="py-2 px-4">{{ file }}</td>
               <td class="py-2 px-4">
                 <a
-                  :href="`http://127.0.0.1:5000/app/output/simulations/${file}`"
+                  :href="`${apiUrl}/app/output/simulations/${file}`"
                   target="_blank"
                   class="text-blue-600 underline hover:text-blue-800"
                 >
@@ -90,7 +90,7 @@
 <script>
 import axios from 'axios'
 import NavbarGeneral from './NavbarGeneral.vue'
-
+const apiUrl = import.meta.env.VITE_API_URL;
 export default {
   name: 'MenuUsuario',
   components: {
@@ -108,7 +108,7 @@ export default {
   methods: {
     async previsualizarCSV(nombreArchivoJson) {
   try {
-    const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
+    const response = await axios.get(`${apiUrl}/app/output/simulations/${nombreArchivoJson}`)
     const jsonData = response.data
     const registros = jsonData.records
 
@@ -137,7 +137,7 @@ cerrarPreview() {
       }
 
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/queue/files/${hospitalId}`)
+        const response = await axios.get(`${apiUrl}/queue/files/${hospitalId}`)
         this.files = response.data.files || []
       } catch (error) {
         console.error('Error al obtener archivos:', error)
@@ -146,7 +146,7 @@ cerrarPreview() {
 
     async descargarCSVDesdeJSON(nombreArchivoJson) {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
+        const response = await axios.get(`${apiUrl}/app/output/simulations/${nombreArchivoJson}`)
         const jsonData = response.data
 
         const registros = jsonData.records

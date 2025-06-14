@@ -1,56 +1,61 @@
 <template>
-  <div class="grid">
-    <!-- Sección izquierda: formulario -->
-    <div class="order__left centered">
-      <div class="form">
-        <!-- Logo -->
-        <div class="logo">
-          <h1 style="color: #ac3030; font-size: 28px; font-weight: bold;">
-            <font-awesome-icon :icon="['fas', 'circle-user']" /> FlowMedic
-          </h1>
+  <div>
+    <NavbarComponent />
+
+    <!-- Contenedor principal -->
+    <div class="grid">
+      <!-- Sección izquierda: formulario -->
+      <div class="order__left centered">
+        <div class="form">
+          <!-- Logo -->
+          <div class="logo">
+            <h1 style="color: #ac3030; font-size: 28px; font-weight: bold;">
+              <font-awesome-icon :icon="['fas', 'circle-user']" /> FlowMedic
+            </h1>
+          </div>
+          <h4>
+            Bienvenido a FlowMedic. Plataforma oficial para monitoreo de urgencias hospitalarias.
+          </h4>
+
+          <!-- Formulario -->
+          <form @submit.prevent="login">
+            <input
+              type="email"
+              placeholder="Correo"
+              v-model="email"
+              autocomplete="off"
+            />
+            <input
+              type="password"
+              placeholder="Contraseña"
+              v-model="password"
+              autocomplete="off"
+            />
+            <button type="submit" class="login__button">
+              <font-awesome-icon :icon="['fas', 'sign-in-alt']" /> Ingresar
+            </button>
+          </form>
         </div>
-        <h4>
-          Bienvenido a FlowMedic. Plataforma oficial para monitoreo de urgencias hospitalarias.
-        </h4>
-
-        <!-- Formulario -->
-        <form @submit.prevent="login">
-          <input
-            type="email"
-            placeholder="Correo"
-            v-model="email"
-            autocomplete="off"
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            v-model="password"
-            autocomplete="off"
-          />
-
-          <button type="submit" class="login__button">
-            <font-awesome-icon :icon="['fas', 'sign-in-alt']" /> Ingresar
-          </button>
-        </form>
       </div>
-    </div>
 
-    <!-- Sección derecha: imagen decorativa -->
-    <div class="order__right centered no__overflow">
-      <img
-        class="img"
-        src="../assets/fondo_login.png"
-        alt="Decoración médica"
-      />
+      <!-- Sección derecha: imagen decorativa -->
+      <div class="order__right centered no__overflow">
+        <img
+          class="img"
+          src="../assets/fondo_login.png"
+          alt="Decoración médica"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import NavbarComponent from '@/components/NavbarGeneral.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
-// Importaciones FontAwesome
+// FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCircleUser, faSignInAlt } from '@fortawesome/free-solid-svg-icons'
@@ -60,7 +65,8 @@ library.add(faCircleUser, faSignInAlt)
 export default {
   name: 'LoginPage',
   components: {
-    FontAwesomeIcon
+    FontAwesomeIcon,
+    NavbarComponent
   },
   data() {
     return {

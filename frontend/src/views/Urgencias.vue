@@ -13,7 +13,7 @@
             :key="key"
           >
             <label class="form-label">
-              {{ key.replace(/_/g, ' ') }}
+              {{ labels[key] || key }}
             </label>
             <div class="form-input-wrapper">
               <i class="fas fa-user input-icon"></i>
@@ -55,7 +55,6 @@
   </div>
 </template>
 
-
 <script>
 import { defineComponent, reactive, ref } from 'vue'
 import axios from 'axios'
@@ -65,7 +64,6 @@ export default defineComponent({
   name: 'UrgenciasPage',
   components: { NavbarComponent },
   setup() {
-    // Aquí defines todos los campos que necesita tu API, con valores por defecto
     const form = reactive({
       peak_lambda: 15,
       night_lambda: 12,
@@ -90,12 +88,40 @@ export default defineComponent({
       priority_non_urgent: 0.5,
       diag_prob: 0.5,
       admit_prob: 0.1,
-      num_runs: 500, 
+      num_runs: 500,
       hospital_id: Number(localStorage.getItem('hospital_id')) || 1
     })
 
+    const labels = {
+      peak_lambda: 'Llegadas pico',
+      night_lambda: 'Llegadas noche',
+      day_lambda: 'Llegadas día',
+      triage_mean: 'Promedio de triaje',
+      triage_std: 'Desviación triaje',
+      consult_mean: 'Promedio de consulta',
+      consult_std: 'Desviación consulta',
+      diag_xray: 'Tiempo rayos X',
+      diag_lab: 'Tiempo laboratorio',
+      treat_mean: 'Promedio tratamiento',
+      treat_std: 'Desviación tratamiento',
+      doctors_day: 'Doctores día',
+      doctors_night: 'Doctores noche',
+      nurses_day: 'Enfermeras día',
+      nurses_night: 'Enfermeras noche',
+      beds: 'Camas',
+      xray: 'Máquinas rayos X',
+      ultrasound: 'Ultrasonidos',
+      priority_critical: 'Prioridad crítica (%)',
+      priority_urgent: 'Prioridad urgente (%)',
+      priority_non_urgent: 'Prioridad no urgente (%)',
+      diag_prob: 'Probabilidad de diagnóstico',
+      admit_prob: 'Probabilidad de admisión',
+      num_runs: 'N.º de simulaciones',
+      hospital_id: 'ID del hospital'
+    }
+
     const result = ref(null)
-    const error  = ref(null)
+    const error = ref(null)
 
     async function runSimulation() {
       error.value = null
@@ -108,7 +134,7 @@ export default defineComponent({
       }
     }
 
-    return { form, result, error, runSimulation }
+    return { form, result, error, runSimulation, labels }
   }
 })
 </script>
@@ -149,17 +175,21 @@ export default defineComponent({
 .form-group {
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .form-label {
   margin-bottom: 6px;
   font-weight: 500;
   color: #333;
-  text-transform: capitalize;
+  text-align: center;
+  text-transform: none;
 }
 
 .form-input-wrapper {
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .input-icon {
@@ -172,14 +202,13 @@ export default defineComponent({
 }
 
 .form-input {
-  width: 250px; /* o usa max-width si quieres que se adapte */
+  width: 250px;
   padding: 10px 12px 10px 36px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
   transition: border 0.3s;
 }
-
 
 .form-input:focus {
   border-color: #3498db;
@@ -188,7 +217,7 @@ export default defineComponent({
 
 .submit-button {
   width: 250px;
-  margin: 0 auto; 
+  margin: 0 auto;
   background-color: #efdbb7;
   color: #121211;
   font-weight: bold;
@@ -201,7 +230,6 @@ export default defineComponent({
   font-size: 15px;
   transition: background-color 0.3s;
 }
-
 
 .submit-button:hover {
   background-color: #ac3030;
@@ -236,11 +264,4 @@ export default defineComponent({
   color: #68181f;
   font-weight: bold;
 }
-
-.form-input-wrapper {
-  position: relative;
-  display: flex;
-  justify-content: flex-center; 
-}
-
 </style>

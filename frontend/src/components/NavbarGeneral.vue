@@ -7,6 +7,7 @@
 
     <!-- Si estamos en Login, solo mostrar botón Volver -->
     <div v-if="$route.name === 'Login'" class="right-block">
+      <button class="btn btn-outline" @click="goInicio">Inicio</button>
       <button class="btn btn-outline" @click="goBack">Volver</button>
     </div>
 
@@ -16,25 +17,41 @@
       <div class="menu-desktop">
         <ul class="menu">
           <li><a @click.prevent="navigate('Home')" class="menu-link">Inicio</a></li>
-          <li><a @click.prevent="navigate('Hospitales')" class="menu-link">Hospitales</a></li>
         </ul>
 
         <div class="right-block">
-          <button
-            v-if="onSpecialRoute"
-            class="btn btn-outline"
-            @click="goBack"
-          >
-            Volver
-          </button>
-          <button
-            v-else-if="mode === 'public'"
-            class="btn btn-outline"
-            @click="navigate('Login')"
-          >
-            Iniciar Sesión
-          </button>
-        </div>
+  <button
+    v-if="mode === 'user'"
+    class="btn btn-outline"
+    @click="goInicio"
+  >
+    Inicio
+  </button>
+  <button
+    v-if="mode === 'user'"
+    class="btn btn-outline"
+    @click="goBack"
+  >
+    Volver
+  </button>
+
+  <button
+    v-else-if="mode === 'public'"
+    class="btn btn-outline"
+    @click="navigate('Login')"
+  >
+    Iniciar Sesión
+  </button>
+
+  <button
+    v-if="onSpecialRoute"
+    class="btn btn-outline"
+    @click="goBack"
+  >
+    Volver
+  </button>
+</div>
+
       </div>
 
       <!-- Mobile menu -->
@@ -94,8 +111,11 @@ export default {
       this.menuOpen = false;
     },
     goBack() {
-      this.$router.go(-1);
-    }
+      this.$router.push('/index');
+    },
+    goInicio() {
+      this.$router.push('/')
+    },
   }
 };
 </script>

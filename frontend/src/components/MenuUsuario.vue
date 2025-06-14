@@ -57,6 +57,27 @@
           ></iframe>
         </div>
       </div>
+      <div v-if="mostrarPreview" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-5xl overflow-auto max-h-[80vh]">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Vista previa del CSV</h3>
+            <button @click="cerrarPreview" class="text-red-500 font-bold text-lg">✖</button>
+          </div>
+
+          <table class="min-w-full border text-sm">
+            <thead>
+              <tr>
+                <th v-for="col in columnasPreview" :key="col" class="border px-2 py-1 bg-gray-200">{{ col }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(fila, index) in filasPreview" :key="index">
+                <td v-for="col in columnasPreview" :key="col" class="border px-2 py-1">{{ fila[col] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
   <FooterComponent />
@@ -120,6 +141,10 @@ export default {
       try {
         const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
         const registros = response.data.records
+        if (!registros || registros.length === 0) {
+          alert('No hay datos para mostrar en la vista previa.')
+          return
+        }
         this.columnasPreview = Object.keys(registros[0])
         this.filasPreview = registros
         this.mostrarPreview = true
@@ -129,6 +154,8 @@ export default {
     },
     cerrarPreview() {
       this.mostrarPreview = false
+      this.columnasPreview = []
+  this.filasPreview = []
     }
   },
   mounted() {

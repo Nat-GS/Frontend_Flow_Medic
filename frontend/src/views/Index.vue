@@ -1,6 +1,6 @@
 <template>
   <div class="homepage">
-    <NavbarComponent />
+    <NavbarComponent/>
 
     <!-- Hero Section rediseñada -->
     <section class="hero">

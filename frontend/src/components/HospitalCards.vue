@@ -3,34 +3,31 @@
     <div class="cards-container">
       <div
         class="card"
-        v-for="(card, i) in cards"
-        :key="i"
+        v-for="h in hospitals"
+        :key="h.id"
       >
         <div class="card-head">
           <div class="card-product-img">
-            <img :src="card.productImg" alt="image" />
+            <!-- pon aquí una imagen por hospital, o un placeholder -->
+            <img src="@/assets/materno.jpg" alt="hospital" />
           </div>
         </div>
 
         <div class="card-body">
-          <a href="#">
-            <h3 class="card-title">{{ card.title }}</h3>
-          </a>
-
-          <p class="card-text">{{ card.text }}</p>
-
+          <h3 class="card-title">{{ h.nombre }}</h3>
+          <p class="card-text">{{ h.ubicacion }}</p>
           <button
             class="status-btn"
-            :style="{ backgroundColor: card.available ? '#c7ea46' : '#e00000' }"
+            :style="{ backgroundColor: h.available ? '#c7ea46' : '#e00000' }"
           >
-            {{ card.available ? 'Disponible' : 'Lleno' }}
+            {{ h.available ? 'Disponible' : 'Lleno' }}
           </button>
         </div>
 
         <button
           class="view-btn"
           aria-label="Ver"
-          @click="openPopup(i)"
+          @click="openPopup(h)"
         >
           <span class="dots">•••</span>
         </button>
@@ -39,63 +36,44 @@
 
     <EstadoPopup
       v-if="popupVisible"
-      :card="cards[popupIndex]"
+      :hospital="selectedHospital"
       @close="popupVisible = false"
     />
   </div>
 </template>
 
 <script>
-import EstadoPopup from './Estado_Popup.vue'
+import { defineComponent, ref, onMounted } from 'vue'
+import EstadoPopup from '@/components/Estado_Popup.vue'
+import axios from 'axios'
 
-export default {
+export default defineComponent({
   name: 'HospitalCards',
-  components: {
-    EstadoPopup
-  },
-  data() {
-    return {
-      popupVisible: false,
-      popupIndex: null,
-      cards: [
-        {
-          productImg: require('@/assets/arco_iris.jpg'),
-          title: 'Hospital Arco Iris',
-          text:
-            'Villa Fátima Av. 15 de Abril No. 40, La Paz – Bolivia · Teléfono: (+591 2) 221 6021 · Atención Lunes-Domingo 24h.',
-          available: true
-        },
-        {
-          productImg: require('@/assets/cotahuma.jpg'),
-          title: 'Hospital Cotahuma',
-          text:
-            'Av. Victor Agustín Ugarte Jaime Zudañes · Teléfono: 2 2652767 · Atención Lunes-Domingo 24h.',
-          available: false
-        },
-        {
-          productImg: require('@/assets/obrero.jpg'),
-          title: 'Hospital Obrero No. 1',
-          text:
-            'Av. Brasil #1745 entre Lucas Jaimes y José Gutiérrez · Teléfono: (591-2) 2223392 · Atención Lunes-Domingo 24h.',
-          available: true
-        },
-        {
-          productImg: require('@/assets/materno.jpg'),
-          title: 'Hospital Materno Infantil',
-          text:
-            'Calle República Dominicana entre Díaz Romero y Villalobos, Miraflores · Tel: (591-2) 2242424 · Atención Lunes-Domingo 24h.',
-          available: false
-        }
-      ]
+  components: { EstadoPopup },
+  setup() {
+    const hospitals    = ref([])
+    const popupVisible = ref(false)
+    const selectedHospital = ref(null)
+
+    async function loadHospitals() {
+      try {
+        const { data } = await axios.get('http://localhost:5000/hospitals/')
+        hospitals.value = data
+      } catch (e) {
+        console.error('Error cargando hospitales', e)
+      }
     }
-  },
-  methods: {
-    openPopup(index) {
-      this.popupIndex = index
-      this.popupVisible = true
+
+    function openPopup(hospital) {
+      selectedHospital.value = hospital
+      popupVisible.value     = true
     }
+
+    onMounted(loadHospitals)
+
+    return { hospitals, popupVisible, selectedHospital, openPopup }
   }
-}
+})
 </script>
 
 <style scoped>

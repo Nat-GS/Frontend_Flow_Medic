@@ -2,47 +2,55 @@
   <div>
     <NavbarComponent />
 
-    <div class="p-8 text-center">
-      <h1 class="text-2xl font-bold">Página de Urgencias</h1>
-      <p>Visualización y simulación en tiempo real.</p>
-    </div>
+    <div class="form-container">
+      <div class="form-card">
+        <h2 class="form-title">Simulación de Urgencias</h2>
 
-    <form @submit.prevent="runSimulation" class="max-w-xl mx-auto space-y-4 p-4">
-      <div v-for="(value, key) in form" :key="key" class="flex items-center">
-        <label class="w-40 text-right mr-4">{{ key.replace(/_/g, ' ') }}</label>
-        <input
-          v-if="typeof value === 'number'"
-          type="number"
-          step="any"
-          v-model.number="form[key]"
-          class="flex-1 border rounded px-2 py-1"
-        />
-        <input
-          v-else
-          type="text"
-          v-model="form[key]"
-          class="flex-1 border rounded px-2 py-1"
-        />
+        <form @submit.prevent="runSimulation" class="form-body">
+          <div
+            class="form-group"
+            v-for="(value, key) in form"
+            :key="key"
+          >
+            <label class="form-label">
+              {{ labels[key] || key }}
+            </label>
+            <div class="form-input-wrapper">
+              <i class="fas fa-user input-icon"></i>
+              <input
+                v-if="typeof value === 'number'"
+                type="number"
+                step="any"
+                v-model.number="form[key]"
+                class="form-input"
+              />
+              <input
+                v-else
+                type="text"
+                v-model="form[key]"
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="submit-button">
+            Ejecutar Simulación
+          </button>
+        </form>
       </div>
 
-      <button
-        type="submit"
-        class="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-      >
-        Ejecutar Simulación
-      </button>
-    </form>
+      <!-- Resultados -->
+      <div v-if="result" class="result-box">
+        <h3 class="result-title">Resultados</h3>
+        <p><strong>Archivo:</strong> {{ result.file_name }}</p>
+        <p><strong>ID en queue:</strong> {{ result.queue_id }}</p>
+        <h4>Métricas</h4>
+        <pre class="result-metrics">{{ result.metrics }}</pre>
+      </div>
 
-    <div v-if="result" class="mt-8 p-4 bg-gray-100 rounded">
-      <h2 class="text-xl font-semibold mb-2">Resultados</h2>
-      <p><strong>Archivo:</strong> {{ result.file_name }}</p>
-      <p><strong>ID en queue:</strong> {{ result.queue_id }}</p>
-      <h3 class="mt-4 font-medium">Métricas</h3>
-      <pre class="bg-white p-2 rounded">{{ result.metrics }}</pre>
-    </div>
-
-    <div v-if="error" class="mt-4 text-red-600">
-      {{ error }}
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
     </div>
   </div>
 </template>
@@ -56,7 +64,6 @@ export default defineComponent({
   name: 'UrgenciasPage',
   components: { NavbarComponent },
   setup() {
-    // Aquí defines todos los campos que necesita tu API, con valores por defecto
     const form = reactive({
       peak_lambda: 15,
       night_lambda: 12,
@@ -81,12 +88,40 @@ export default defineComponent({
       priority_non_urgent: 0.5,
       diag_prob: 0.5,
       admit_prob: 0.1,
-      num_runs: 500, 
+      num_runs: 500,
       hospital_id: Number(localStorage.getItem('hospital_id')) || 1
     })
 
+    const labels = {
+      peak_lambda: 'Llegadas pico',
+      night_lambda: 'Llegadas noche',
+      day_lambda: 'Llegadas día',
+      triage_mean: 'Promedio de triaje',
+      triage_std: 'Desviación triaje',
+      consult_mean: 'Promedio de consulta',
+      consult_std: 'Desviación consulta',
+      diag_xray: 'Tiempo rayos X',
+      diag_lab: 'Tiempo laboratorio',
+      treat_mean: 'Promedio tratamiento',
+      treat_std: 'Desviación tratamiento',
+      doctors_day: 'Doctores día',
+      doctors_night: 'Doctores noche',
+      nurses_day: 'Enfermeras día',
+      nurses_night: 'Enfermeras noche',
+      beds: 'Camas',
+      xray: 'Máquinas rayos X',
+      ultrasound: 'Ultrasonidos',
+      priority_critical: 'Prioridad crítica (%)',
+      priority_urgent: 'Prioridad urgente (%)',
+      priority_non_urgent: 'Prioridad no urgente (%)',
+      diag_prob: 'Probabilidad de diagnóstico',
+      admit_prob: 'Probabilidad de admisión',
+      num_runs: 'N.º de simulaciones',
+      hospital_id: 'ID del hospital'
+    }
+
     const result = ref(null)
-    const error  = ref(null)
+    const error = ref(null)
 
     async function runSimulation() {
       error.value = null
@@ -99,11 +134,134 @@ export default defineComponent({
       }
     }
 
-    return { form, result, error, runSimulation }
+    return { form, result, error, runSimulation, labels }
   }
 })
 </script>
 
 <style scoped>
-/* ... */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+.form-container {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
+
+.form-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-label {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  text-transform: none;
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 250px;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border 0.3s;
+}
+
+.form-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.submit-button {
+  width: 250px;
+  margin: 0 auto;
+  background-color: #efdbb7;
+  color: #121211;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  border-width: 2px;
+  border-style: solid;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #ac3030;
+  color: white;
+}
+
+/* Resultado y errores */
+.result-box {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.result-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.result-metrics {
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.error-message {
+  margin-top: 20px;
+  color: #68181f;
+  font-weight: bold;
+}
 </style>

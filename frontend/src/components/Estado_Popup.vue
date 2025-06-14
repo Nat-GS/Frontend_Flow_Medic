@@ -3,7 +3,24 @@
     <div class="popup-wrapper">
       <button class="close-btn" @click="$emit('close')">×</button>
       <div class="popup-content">
-        <h2>Estado en emergencias del {{ card.title }}</h2>
+        <h2>Estado en emergencias de {{ hospital.nombre }}</h2>
+
+        <p>
+          <strong>Tiempo promedio de estancia:</strong>
+          {{ hospital.avg_los.toFixed(2) }} minutos
+        </p>
+        <p v-if="hospital.available">
+          Este hospital está <span style="color:green">Disponible</span>
+          porque su tiempo medio de estadía
+          ({{ hospital.avg_los.toFixed(2) }} min) es menor que el umbral (100 min).
+        </p>
+        <p v-else>
+          Este hospital está <span style="color:red">Lleno</span>
+          porque su tiempo medio de estadía
+          ({{ hospital.avg_los.toFixed(2) }} min) supera el umbral (100 min).
+        </p>
+
+        <!-- animación Lottie -->
         <div ref="lottieContainer" class="lottie-animation"></div>
       </div>
     </div>
@@ -16,10 +33,10 @@ import lottie from 'lottie-web'
 export default {
   name: 'EstadoPopup',
   props: {
-    card: { type: Object, required: true }
+    hospital: { type: Object, required: true }
   },
   mounted() {
-    // Usamos la versión .json en vez de .lottie
+    // carga la animación en el contenedor
     fetch('https://lottie.host/cb610833-aad9-46a4-baa9-58c1ecd21df9/3H3P6HSFGb.json')
       .then(res => res.json())
       .then(animationData => {
@@ -37,6 +54,7 @@ export default {
   }
 }
 </script>
+
 
 <style scoped>
 .popup-backdrop {

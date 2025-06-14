@@ -81,8 +81,8 @@ export default defineComponent({
       priority_non_urgent: 0.5,
       diag_prob: 0.5,
       admit_prob: 0.1,
-      num_runs: 500,         // ¡IMPORTANTE! asegúrate de incluir este
-      hospital_id: 1         // o recógelo de localStorage o tu lógica de login
+      num_runs: 500, 
+      hospital_id: Number(localStorage.getItem('hospital_id')) || 1
     })
 
     const result = ref(null)

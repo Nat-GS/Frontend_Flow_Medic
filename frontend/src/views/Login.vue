@@ -90,11 +90,13 @@ methods:{
 
         if (response.data.id_usuario) {
           localStorage.setItem('Usuario_id_usuario', response.data.id_usuario)
+         if (response.data.hospital_id) {
+         localStorage.setItem('hospital_id', response.data.hospital_id)
         } else {
-          console.error('No se recibió id_usuario en la respuesta')
-          alert('No se pudo obtener el ID del usuario.')
+            console.warn('No se recibió hospital_id en la respuesta')
           return
         }
+      }
 
         if (response.data.token && response.data.nombre) {
           localStorage.setItem('authToken', response.data.token)

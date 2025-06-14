@@ -15,18 +15,21 @@
     <section class="mt-10">
       <HospitalCards />
     </section>
+    <FooterComponent />
   </div>
 </template>
 
 <script>
 import NavbarComponent from '@/components/NavbarGeneral.vue'
 import HospitalCards from '@/components/HospitalCards.vue'
+import FooterComponent from '@/components/Footer_Component.vue'
 
 export default {
   name: 'HomePage',
   components: {
     NavbarComponent,
-    HospitalCards
+    HospitalCards,
+    FooterComponent
   }
 }
 </script>

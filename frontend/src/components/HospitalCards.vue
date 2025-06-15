@@ -57,7 +57,7 @@ export default defineComponent({
 
     async function loadHospitals() {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/hospitals/`)
+        const { data } = await axios.get(`${process.env.VUE_APP_API_URL}/hospitals/`)
         hospitals.value = data
       } catch (e) {
         console.error('Error cargando hospitales', e)

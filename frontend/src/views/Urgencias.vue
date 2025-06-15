@@ -178,7 +178,7 @@ export default defineComponent({
       result.value = null
       
       try {
-        const resp = await axios.post(`${process.env.VITE_API_URL}/simulate/`, form)
+        const resp = await axios.post('http://localhost:5000/simulate/', form)
         result.value = resp.data
         await nextTick()
         resultSection.value?.scrollIntoView({ behavior: 'smooth' })

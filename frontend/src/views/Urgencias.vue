@@ -107,6 +107,7 @@ import { defineComponent, reactive, ref ,nextTick } from 'vue'
 import axios from 'axios'
 import NavbarComponent from '@/components/NavbarGeneral.vue'
 import FooterComponent from '@/components/Footer_Component.vue'
+const apiUrl = process.env.VUE_APP_API_URL;
 
 export default defineComponent({
   name: 'UrgenciasPage',
@@ -178,7 +179,7 @@ export default defineComponent({
       result.value = null
       
       try {
-        const resp = await axios.post('http://localhost:5000/simulate/', form)
+        const resp = await axios.post(`${apiUrl}/simulate/`, form)
         result.value = resp.data
         await nextTick()
         resultSection.value?.scrollIntoView({ behavior: 'smooth' })

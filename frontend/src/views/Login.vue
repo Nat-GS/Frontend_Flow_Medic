@@ -73,7 +73,7 @@
       <div class="order__right centered no__overflow">
         <img
           class="img"
-          src="../assets/fondo_login.png"
+          src="https://ibb.co/7dV6XfmX"
           alt="Decoración médica"
         />
       </div>

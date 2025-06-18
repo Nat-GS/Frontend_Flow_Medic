@@ -116,7 +116,7 @@ export default {
       try {
         // El blueprint está montado en "/hospitals/" para POST
         const { data } = await axios.post(
-          'http://127.0.0.1:5000/hospitals/',
+          'http://127.0.0.1:5000/hospital/',
           {
             nombre: this.nombre,
             ubicacion: this.ubicacion

@@ -9,7 +9,7 @@
           <h1 class="title">Bienvenido a FlowMedic</h1>
           <p class="subtitle">Gestiona y visualiza tus simulaciones hospitalarias con un solo clic.</p>
           <button @click="goToSimulacion" class="sim-button">
-            <font-awesome-icon :icon="['fas', 'play']" class="mr-2" /> 
+            <font-awesome-icon :icon="['fas', 'play']" class="mr-2" />
             ­­­ㅤGenerar Simulación
           </button>
 
@@ -28,7 +28,7 @@
                   <td>{{ file }}</td>
                   <td>
                     <a
-                      :href="`${process.env.VUE_APP_API_URL}/app/output/simulations/${file}`"
+                      :href="`http://127.0.0.1:5000/app/output/simulations/${file}`"
                       target="_blank"
                       class="text-blue-600 hover:underline"
                     >
@@ -57,6 +57,8 @@
           ></iframe>
         </div>
       </div>
+
+      <!-- Modal de previsualización -->
       <div v-if="mostrarPreview" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-5xl overflow-auto max-h-[80vh]">
           <div class="flex justify-between items-center mb-4">
@@ -64,23 +66,31 @@
             <button @click="cerrarPreview" class="text-red-500 font-bold text-lg">✖</button>
           </div>
 
-          <table class="min-w-full border text-sm">
+          <table class="preview-table">
             <thead>
               <tr>
-                <th v-for="col in columnasPreview" :key="col" class="border px-2 py-1 bg-gray-200">{{ col }}</th>
+                <th
+                  v-for="col in columnasPreview"
+                  :key="col"
+                >
+                  {{ columnLabels[col] || col }}
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(fila, index) in filasPreview" :key="index">
-                <td v-for="col in columnasPreview" :key="col" class="border px-2 py-1">{{ fila[col] }}</td>
+                <td v-for="col in columnasPreview" :key="col">
+                  {{ fila[col] }}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
+    <FooterComponent />
   </div>
-  <FooterComponent />
 </template>
 
 <script>
@@ -90,7 +100,6 @@ import FooterComponent from './Footer_Component.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
-
 library.add(faPlay)
 
 export default {
@@ -101,7 +110,21 @@ export default {
       files: [],
       mostrarPreview: false,
       columnasPreview: [],
-      filasPreview: []
+      filasPreview: [],
+      // Mapeo de columnas técnicas a etiquetas en español
+      columnLabels: {
+        patient_id:     'ID Paciente',
+        priority:       'Prioridad',
+        arrival_time:   'Hora de llegada',
+        triage_wait:    'Espera triaje',
+        triage_end:     'Fin triaje',
+        consult_wait:   'Espera consulta',
+        consult_end:    'Fin consulta',
+        diag_wait:      'Espera diagnóstico',
+        diag_end:       'Fin diagnóstico',
+        treat_wait:     'Espera tratamiento',
+        treat_end:      'Fin tratamiento'
+      }
     }
   },
   methods: {
@@ -109,7 +132,7 @@ export default {
       const hospitalId = localStorage.getItem('hospital_id')
       if (!hospitalId) return
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/queue/files/${hospitalId}`)
+        const response = await axios.get(`http://127.0.0.1:5000/queue/files/${hospitalId}`)
         this.files = response.data.files || []
       } catch (e) {
         console.error('Error:', e)
@@ -120,7 +143,7 @@ export default {
     },
     async descargarCSVDesdeJSON(nombreArchivoJson) {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/app/output/simulations/${nombreArchivoJson}`)
+        const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
         const registros = response.data.records
         const keys = Object.keys(registros[0])
         const csvRows = [keys.join(','), ...registros.map(obj => keys.map(k => JSON.stringify(obj[k])).join(','))]
@@ -133,29 +156,29 @@ export default {
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
-      } catch (err) {
+      } catch {
         alert('Error al convertir el JSON.')
       }
     },
     async previsualizarCSV(nombreArchivoJson) {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_URL}/app/output/simulations/${nombreArchivoJson}`)
+        const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
         const registros = response.data.records
         if (!registros || registros.length === 0) {
           alert('No hay datos para mostrar en la vista previa.')
           return
         }
         this.columnasPreview = Object.keys(registros[0])
-        this.filasPreview = registros
-        this.mostrarPreview = true
+        this.filasPreview    = registros
+        this.mostrarPreview  = true
       } catch {
         alert('Error al mostrar la vista previa.')
       }
     },
     cerrarPreview() {
-      this.mostrarPreview = false
-      this.columnasPreview = []
-  this.filasPreview = []
+      this.mostrarPreview   = false
+      this.columnasPreview  = []
+      this.filasPreview     = []
     }
   },
   mounted() {
@@ -271,5 +294,28 @@ export default {
 }
 .btn-gray:hover {
   background-color: #4b5563;
+}
+
+/* Excel-like preview table */
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  background-color: #ffecec;
+}
+.preview-table th,
+.preview-table td {
+  border: 1px solid #999;
+  padding: 8px;
+  text-align: left;
+  background-color: #ffecec;
+}
+.preview-table th {
+  background-color: #ffdede;
+  font-weight: bold;
+}
+.preview-table tr:hover td {
+  background-color: #ffdcdc;
 }
 </style>

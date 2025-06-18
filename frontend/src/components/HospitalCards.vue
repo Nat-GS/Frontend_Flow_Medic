@@ -57,7 +57,7 @@ export default defineComponent({
 
     async function loadHospitals() {
       try {
-        const { data } = await axios.get('https://queuingapp.onrender.com/hospitals/')
+        const { data } = await axios.get('https://queuingapp.onrender.com/hospital/')
         hospitals.value = data
       } catch (e) {
         console.error('Error cargando hospitales', e)

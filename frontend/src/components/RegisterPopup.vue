@@ -1,374 +1,298 @@
 <template>
-  <div>
-    <NavbarComponent />
+  <div
+    v-if="isVisible"
+    class="register-hospital-popup-overlay"
+    @click.self="closePopup"
+  >
+    <div class="register-hospital-popup">
+      <!-- Botón cerrar -->
+      <button class="close-btn" @click="closePopup">×</button>
 
-    <!-- Popup de registro de usuario -->
-    <RegisterPopup
-      :isVisible="showRegisterPopup"
-      @close="showRegisterPopup = false"
-      @register="handleUserRegister" 
-    />
+      <div class="popup-content">
+        <!-- Título -->
+        <h2>Registrar Hospital</h2>
 
-    <!-- Popup de registro de hospital -->
-    <RegisterHospitalPopup
-      :isVisible="showHospitalPopup"
-      @close="showHospitalPopup = false"
-      @register-hospital="handleHospitalRegister"
-    />
-
-    <!-- Contenedor principal -->
-    <div class="grid">
-      <!-- Sección izquierda: formulario -->
-      <div class="order__left centered">
-        <div class="form">
-          <!-- Logo -->
-          <div class="logo">
-            <h1 style="color: #ac3030; font-size: 28px; font-weight: bold;">
-              <font-awesome-icon :icon="['fas', 'circle-user']" /> FlowMedic
-            </h1>
-          </div>
-          <h4>
-            Bienvenido a FlowMedic. Plataforma oficial para monitoreo de urgencias hospitalarias.
-          </h4>
-
-          <!-- Formulario de login -->
-          <form @submit.prevent="login">
-            <input
-              type="email"
-              placeholder="Correo"
-              v-model.trim="email"
-              autocomplete="off"
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              v-model.trim="password"
-              autocomplete="off"
-            />
-            <button type="submit" class="login__button">
-              <font-awesome-icon :icon="['fas', 'sign-in-alt']" /> Ingresar
-            </button>
-          </form>
-
-          <!-- Sección registro de usuario -->
-          <div class="register-prompt">
-            <label>¿Aún no te has registrado?</label>
-            <button class="register__button" @click="openRegisterPopup">
-              <font-awesome-icon :icon="['fas', 'user-plus']" class="icon-btn" />
-              Registrarse
-            </button>
-          </div>
-          <!-- Sección registro de hospitales -->
-          <div class="hospital-register-prompt">
-            <label>¿Eres administrador de un hospital?</label>
-            <button class="hospital-register__button" @click="openHospitalPopup">
-              <font-awesome-icon :icon="['fas', 'hospital']" class="icon-btn" />
-              Registrar Hospital
-            </button>
-          </div>
+        <!-- Contenedor del GIF centrado -->
+        <div class="icon-container">
+          <!-- GIF desde assets -->
+          <img src="@/assets/medicos.gif" alt="Médicos" class="gif-animation" />
         </div>
-      </div>
 
-      <!-- Sección derecha: imagen decorativa -->
-      <div class="order__right centered no__overflow">
-        <img
-          class="img"
-          src="https://i.ibb.co/4g3y5QZ/fondo-login.png"
-          alt="Decoración médica"
-        />
+        <!-- Formulario -->
+        <form @submit.prevent="onRegister">
+          <!-- Nombre del hospital -->
+          <div class="form-group">
+            <label for="hospitalName">Nombre</label>
+            <input
+              type="text"
+              id="hospitalName"
+              v-model.trim="nombre"
+              placeholder="Nombre del hospital"
+              @blur="validateField('nombre')"
+              :class="{ 'error-border': errors.nombre }"
+            />
+            <span v-if="errors.nombre" class="error-message">{{ errors.nombre }}</span>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="form-group">
+            <label for="ubicacion">Ubicación</label>
+            <input
+              type="text"
+              id="ubicacion"
+              v-model.trim="ubicacion"
+              placeholder="Ubicación del hospital"
+              @blur="validateField('ubicacion')"
+              :class="{ 'error-border': errors.ubicacion }"
+            />
+            <span v-if="errors.ubicacion" class="error-message">{{ errors.ubicacion }}</span>
+          </div>
+
+          <!-- Botón Registrar -->
+          <button type="submit" class="btn-register">Registrar</button>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import NavbarComponent from '@/components/NavbarGeneral.vue'
-import RegisterPopup from '@/components/RegisterPopup.vue'
-import RegisterHospitalPopup from '@/components/RegisterHospitalPopup.vue'
+import axios from 'axios'
 import Swal from 'sweetalert2'
-import axios from 'axios' // si usas login con backend; si no, elimina axios y lógica de login
-
-// FontAwesome
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import {
-  faCircleUser,
-  faSignInAlt,
-  faUserPlus,
-  faHospital
-} from '@fortawesome/free-solid-svg-icons'
-
-library.add(faCircleUser, faSignInAlt, faUserPlus, faHospital)
 
 export default {
-  name: 'LoginPage',
-  components: {
-    FontAwesomeIcon,
-    NavbarComponent,
-    RegisterPopup,
-    RegisterHospitalPopup
+  name: 'RegistroHospitalPopup',
+  props: {
+    isVisible: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
-      email: '',
-      password: '',
-      showRegisterPopup: false,
-      showHospitalPopup: false
+      nombre: '',
+      ubicacion: '',
+      errors: {
+        nombre: '',
+        ubicacion: ''
+      }
+    }
+  },
+  watch: {
+    isVisible(val) {
+      if (!val) this.clearForm()
     }
   },
   methods: {
-    async login() {
-      // Si no tienes backend aún, podrías simular o simplemente validar campos vacíos
-      if (!this.email || !this.password) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Campos incompletos',
-          text: 'Por favor ingresa tu correo y contraseña.',
-        })
-        return
+    closePopup() {
+      this.$emit('close')
+      this.clearForm()
+    },
+    validateField(field) {
+      this.errors[field] = ''
+      if (field === 'nombre') {
+        if (!this.nombre) this.errors.nombre = 'El nombre no puede estar vacío'
+        else if (this.nombre.length < 3) this.errors.nombre = 'Debe tener al menos 3 caracteres'
       }
-      // Si tienes backend para login, conserva lógica axios aquí:
+      if (field === 'ubicacion') {
+        if (!this.ubicacion) this.errors.ubicacion = 'La ubicación no puede estar vacía'
+        else if (this.ubicacion.length < 3) this.errors.ubicacion = 'Debe tener al menos 3 caracteres'
+      }
+    },
+    validateForm() {
+      this.validateField('nombre')
+      this.validateField('ubicacion')
+      return !this.errors.nombre && !this.errors.ubicacion
+    },
+    clearForm() {
+      this.nombre = ''
+      this.ubicacion = ''
+      this.errors.nombre = ''
+      this.errors.ubicacion = ''
+    },
+    async onRegister() {
+      if (!this.validateForm()) return
+
       try {
-        const response = await axios.post('http://127.0.0.1:5000/usuario/login', {
-          email: this.email,
-          contrasenia: this.password
-        })
-        // ... manejo de respuesta ...
-        if (response.data.id_usuario) {
-          localStorage.setItem('Usuario_id_usuario', response.data.id_usuario)
-        }
-        if (response.data.hospital_id) {
-          localStorage.setItem('hospital_id', response.data.hospital_id)
-        }
-        localStorage.setItem('authToken', response.data.token)
-        localStorage.setItem('nombre', response.data.nombre)
+        // El blueprint está montado en "/hospitals/" para POST
+        const { data } = await axios.post(
+          'http://127.0.0.1:5000/hospital/',
+          {
+            nombre: this.nombre,
+            ubicacion: this.ubicacion
+          }
+        )
 
         Swal.fire({
           icon: 'success',
-          title: 'Login exitoso',
-          text: 'Has iniciado sesión correctamente',
+          title: 'Hospital creado',
+          text: `Hospital: ${data.nombre}`
         })
-        this.$router.push('/menu-usuario')
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Login fallido',
-          text: 'Verifica tus credenciales.',
-        })
-      }
-    },
-    openRegisterPopup() {
-      this.showRegisterPopup = true
-    },
-    handleUserRegister(payload) {
-      // Ejemplo de recepción de registro de usuario simulado
-      // payload = { nombre, email, telefono, contrasenia }
-      console.log('Datos registro usuario:', payload)
-      Swal.fire({
-        icon: 'success',
-        title: 'Registro Usuario (simulado)',
-        text: `Usuario "${payload.nombre}" listo para registrar.`,
-      })
-      // Cerrar popup (ya lo cierra el propio componente al emitir close)
-      this.showRegisterPopup = false
-    },
 
-    openHospitalPopup() {
-      this.showHospitalPopup = true
-    },
-    handleHospitalRegister(payload) {
-      // payload = { nombre, ubicacion }
-      console.log('Datos hospital:', payload)
-      Swal.fire({
-        icon: 'success',
-        title: 'Registro Hospital (simulado)',
-        text: `Hospital "${payload.nombre}" en "${payload.ubicacion}" listo para registrar.`,
-      })
-      // cerrar popup (se cierra automáticamente en RegistroHospitalPopup tras emitir close)
-      this.showHospitalPopup = false
+        this.clearForm()
+        this.closePopup()
+
+      } catch (err) {
+        // Si el OPTIONS preflight falla, revisa CORS en tu servidor
+        if (err.response && err.response.data.error) {
+          Swal.fire('Error', err.response.data.error, 'error')
+        } else if (err.response) {
+          Swal.fire('Error', 'Revisa tus datos', 'error')
+        } else {
+          Swal.fire('Error de red', 'No se pudo conectar al servidor', 'error')
+        }
+      }
     }
   }
 }
 </script>
 
+
 <style scoped>
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: 100vh;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* Box-sizing global */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
-.order__left {
-  order: 1;
-  padding: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; 
+* {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
 }
-.order__right {
-  order: 2;
-}
-.centered {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.no__overflow {
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-.form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
+/* Overlay */
+.register-hospital-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-}
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.logo {
-  margin-bottom: 12px;
-  text-align: center;
-}
-h4 {
-  color: #121211;
-  text-align: center;
-  margin-bottom: 30px;
-  letter-spacing: 0.2px;
-  line-height: 20px;
-  font-size: 15px;
-  max-width: 280px;
-}
-input[type=email],
-input[type=password] {
-  width: 260px;
-  padding: 12px 16px;
-  margin: 10px 0;
-  border: 1px solid #c8c3cf;
-  border-radius: 4px;
-  background-color: #F6F5F7;
-  font-size: 15px;
-  color: #121211;
-}
-input:focus {
-  border-color: #ac3030;
-  background: #FDFCFE;
-  box-shadow: 0 0 0 0.25rem #efdbbf;
-}
-.login__button {
-  width: 260px;
-  margin-top: 16px;
-  border: none;
-  background-color: #ac3030;
-  padding: 12px;
-  color: white;
-  border-radius: 4px;
-  font-size: 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.login__button :deep(svg) {
-  margin-right: 8px;
-}
-.login__button:hover {
-  background-color: #68181f;
-}
-
-/* Estilos para la sección de registro de usuario */
-.register-prompt {
-  margin-top: 20px;
-  text-align: center;
-}
-.register-prompt label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-size: 14px;
-}
-.register__button {
-  width: 260px;
-  border: 2px solid #121211;
-  background-color: #efdbbf;
-  padding: 10px;
-  color: #121211;
-  border-radius: 4px;
-  font-size: 15px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.register__button :deep(svg) {
-  margin-right: 8px;
-}
-.register__button:hover {
-  background-color: #e3b87c;
-}
-
-/* Estilos para la sección de registro de hospitales */
-.hospital-register-prompt {
-  margin-top: 15px;
-  text-align: center;
-}
-.hospital-register-prompt label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-size: 14px;
-}
-.hospital-register__button {
-  width: 260px;
-  border: none;
-  background-color: #ac3030;
-  padding: 10px;
-  color: white;
-  border-radius: 4px;
-  font-size: 15px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.hospital-register__button :deep(svg) {
-  margin-right: 8px;
-}
-.hospital-register__button:hover {
-  background-color: #68181f;
-}
-
-.img {
   height: 100%;
-  object-fit: cover;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 20px; /* espacio en móviles */
 }
-@media only screen and (max-width: 800px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .order__left {
-    order: 2;
-    padding: 20px;
-  }
-  .order__right {
-    order: 1;
-  }
-  .img {
-    width: 100vw;
-  }
-  .login__button,
-  .register__button,
-  .hospital-register__button {
-    width: 90%;
-  }
+
+/* Popup */
+.register-hospital-popup {
+  background-color: white;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 100%;
+  padding: 20px 24px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-/* Pequeña clase para separar iconos en botones */
-.icon-btn {
-  margin-right: 8px;
+
+/* Botón cerrar */
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+}
+
+/* Contenido */
+.popup-content {
+  margin-top: 8px;
+}
+.popup-content h2 {
+  color: #af8a8a;
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Contenedor del GIF */
+.icon-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.gif-animation {
+  width: 120px;
+  height: auto;
+  border-radius: 8px;
+  /* Ajusta width según prefieras */
+}
+
+/* Formulario */
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #ac3030;
+  box-shadow: 0 0 0 2px rgba(172, 48, 48, 0.2);
+}
+
+/* Error */
+.error-border {
+  border-color: red !important;
+}
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Botón Registrar */
+.btn-register {
+  width: 100%;
+  background-color: #ac3030;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 8px;
+}
+.btn-register:hover {
+  background-color: #68181f;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .register-hospital-popup {
+    width: 95%;
+    padding: 16px;
+  }
+  .popup-content h2 {
+    font-size: 20px;
+  }
+  .gif-animation {
+    width: 100px;
+  }
 }
 </style>

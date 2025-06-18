@@ -9,7 +9,7 @@
         <div class="card-head">
           <div class="card-product-img">
             <!-- pon aquí una imagen por hospital, o un placeholder -->
-            <img src="@/assets/materno.jpg" alt="hospital" />
+            <img src="@/assets/hospital_image.png" alt="hospital" />
           </div>
         </div>
 
@@ -57,7 +57,7 @@ export default defineComponent({
 
     async function loadHospitals() {
       try {
-        const { data } = await axios.get(`${process.env.VUE_APP_API_URL}/hospitals/`)
+        const { data } = await axios.get('http://localhost:5000/hospitals/')
         hospitals.value = data
       } catch (e) {
         console.error('Error cargando hospitales', e)

@@ -73,7 +73,7 @@
       <div class="order__right centered no__overflow">
         <img
           class="img"
-          src="https://i.imgur.com/LGvaTw0.png"
+          src="https://i.pinimg.com/736x/22/52/b1/2252b1420d12549dc0e87da4ae6fff99.jpg"
           alt="Decoración médica"
         />
       </div>

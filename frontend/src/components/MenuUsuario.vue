@@ -28,7 +28,7 @@
                   <td>{{ file }}</td>
                   <td>
                     <a
-                      :href="`http://127.0.0.1:5000/app/output/simulations/${file}`"
+                      :href="`https://queuingapp.onrender.com/app/output/simulations/${file}`"
                       target="_blank"
                       class="text-blue-600 hover:underline"
                     >
@@ -132,7 +132,7 @@ export default {
       const hospitalId = localStorage.getItem('hospital_id')
       if (!hospitalId) return
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/queue/files/${hospitalId}`)
+        const response = await axios.get(`https://queuingapp.onrender.com/queue/files/${hospitalId}`)
         this.files = response.data.files || []
       } catch (e) {
         console.error('Error:', e)
@@ -143,7 +143,7 @@ export default {
     },
     async descargarCSVDesdeJSON(nombreArchivoJson) {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
+        const response = await axios.get(`https://queuingapp.onrender.com/app/output/simulations/${nombreArchivoJson}`)
         const registros = response.data.records
         const keys = Object.keys(registros[0])
         const csvRows = [keys.join(','), ...registros.map(obj => keys.map(k => JSON.stringify(obj[k])).join(','))]
@@ -162,7 +162,7 @@ export default {
     },
     async previsualizarCSV(nombreArchivoJson) {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/app/output/simulations/${nombreArchivoJson}`)
+        const response = await axios.get(`https://queuingapp.onrender.com/app/output/simulations/${nombreArchivoJson}`)
         const registros = response.data.records
         if (!registros || registros.length === 0) {
           alert('No hay datos para mostrar en la vista previa.')

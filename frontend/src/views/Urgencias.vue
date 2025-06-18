@@ -215,7 +215,7 @@ export default defineComponent({
 
       try {
         const resp = await axios.post(
-          'http://localhost:5000/simulate/',
+          'https://queuingapp.onrender.com/simulate/',
           payload
         )
         result.value = resp.data

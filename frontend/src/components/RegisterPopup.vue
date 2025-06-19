@@ -145,7 +145,7 @@ export default {
     },
     async loadHospitals() {
       try {
-        const { data } = await axios.get('http://127.0.0.1:5000/hospitals/')
+        const { data } = await axios.get('https://queuingapp.onrender.com/hospital/')
         this.hospitals = data
       } catch (e) {
         console.error('Error cargando hospitales:', e)
@@ -190,7 +190,7 @@ export default {
 
       try {
         const { data } = await axios.post(
-          'http://127.0.0.1:5000/usuario/create',
+          'https://queuingapp.onrender.com/usuario/create',
           {
             nombre: this.nombre,
             email: this.email,
